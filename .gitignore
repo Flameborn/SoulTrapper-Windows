@@ -1,0 +1,14 @@
+assets/
+data/
+runtime/
+unicorn/
+vendor/
+saves/
+test-save/
+__pycache__/
+*.pyc
+*.log
+*.ipa
+*.arm
+*.zip
+*.exe
