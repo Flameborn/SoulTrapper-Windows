@@ -10,7 +10,7 @@ class Launcher {
             try {
                 Directory.CreateDirectory(location);
                 string path = Path.Combine(location, "error.log");
-                File.AppendAllText(path, "\r\nSoul Trapper 1.0 launcher\r\n" + DateTime.UtcNow.ToString("o") + "\r\n" + Environment.OSVersion + "\r\n" + details + "\r\n", Encoding.UTF8);
+                File.AppendAllText(path, "\r\nSoul Trapper 1.1 launcher\r\n" + DateTime.UtcNow.ToString("o") + "\r\n" + Environment.OSVersion + "\r\n" + details + "\r\n", Encoding.UTF8);
                 return path;
             } catch (IOException) {} catch (UnauthorizedAccessException) {}
         }

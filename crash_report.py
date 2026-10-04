@@ -6,7 +6,7 @@ from pathlib import Path
 def write_error(context=''):
  root=Path(__file__).resolve().parent
  if root.name=='_internal':root=root.parent
- text=('Soul Trapper 1.0\n'+datetime.now(timezone.utc).isoformat()+'\n'
+ text=('Soul Trapper 1.1\n'+datetime.now(timezone.utc).isoformat()+'\n'
        +platform.platform()+'\nPython '+sys.version+'\n'+context+'\n'+traceback.format_exc())
  for folder in (root,Path(os.environ.get('LOCALAPPDATA',str(root)))/'SoulTrapperWindows'):
   try:

@@ -11,7 +11,7 @@ from crash_report import write_error
 ROOT=Path(__file__).resolve().parent
 class Game:
  def __init__(self,smoke=False):
-  pygame.mixer.pre_init(44100,-16,2,512);pygame.init();pygame.display.set_mode((800,600));pygame.display.set_caption('Soul Trapper 1.0')
+  pygame.mixer.pre_init(44100,-16,2,2048);pygame.init();pygame.display.set_mode((800,600));pygame.display.set_caption('Soul Trapper 1.1')
   pygame.display.get_surface().fill('white');pygame.display.flip()
   self.audio=Audio(ROOT);self.speech=Speech(ROOT,silent=smoke);self.saves=Saves(ROOT/'test-save' if smoke else None)
   self.engine=None;self.mode='menu';self.index=0;self.items=[];self.running=True;self.dialog_index=0;self.last_topics=();self.last_save=0;self.held=set();self.accum=0.;self.error=False
@@ -148,9 +148,9 @@ class Game:
   if self.mode!='play':return
   self.audio.pause();self.mode='pause';self.items=['Resume','Save checkpoint','Load checkpoint','Restart chapter','Main menu','Exit'];self.index=0;self.say('Paused. Resume')
  def resume(self):self.mode='play';self.audio.resume();self.say('Resumed.');self.accum=0
- def save(self,manual=False):
+ def save(self,manual=False,background=False):
   if self.engine and not self.error and (self.mode in ('play','pause','confirm','replay','tutorial') or (self.mode=='help' and self.help_return[0] in ('play','pause','confirm'))):
-   self.saves.write(self.engine,'manual' if manual else 'continue')
+   self.saves.write(self.engine,'manual' if manual else 'continue',background=background)
    if manual:
     state=self.saves.read('manual');self.say('Checkpoint saved. '+self.checkpoint_label(state)+'. This replaces your previous saved checkpoint.')
  def checkpoint_label(self,state):
@@ -308,6 +308,7 @@ class Game:
   v=json.loads((ROOT/'data/metadata.json').read_text())['strings'].values()
   return sorted((s for s in v if s.startswith('Chapter ') and ':' in s),key=lambda s:int(s.split(':')[0].split()[1]))
  def update(self,dt):
+  self.saves.check_pending()
   if self.mode=='replay':
    self.audio.tick(dt)
    if not self.audio.channel('instructions').get_busy():self.next_instruction()
@@ -343,7 +344,7 @@ class Game:
   if hint and hint!=self.last_navigation_hint:self.say(hint)
   self.last_navigation_hint=hint
   if self.engine.now-self.last_save>=30:
-   self.audio.pause();self.save();self.audio.resume();self.last_save=self.engine.now
+   self.save(background=True);self.last_save=self.engine.now
  def log_error(self):
   e=self.engine
   context='Mode: '+self.mode
@@ -368,8 +369,11 @@ class Game:
     self.say('Soul Trapper encountered an error. Your previous saves are safe. Please send error.log to the developer. '+str(self.error_log_path or '')+'. Load checkpoint.')
    frames+=1
    if smoke and frames>10:self.running=False
-  self.audio.stop_all();self.speech.stop();pygame.quit()
+  self.saves.close();self.audio.stop_all();self.speech.stop();pygame.quit()
 if __name__=='__main__':
+ import unicorn
+ print('Soul Trapper 1.1; Python '+sys.version+'; Unicorn '+unicorn.__version__,flush=True)
+ if hasattr(sys,'getwindowsversion'):print('Windows runtime version: '+str(sys.getwindowsversion()),flush=True)
  smoke='--smoke-test' in sys.argv
  try:Game(smoke).run(smoke)
  except Exception:
